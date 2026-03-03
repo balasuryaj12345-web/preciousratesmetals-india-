@@ -213,13 +213,6 @@ canvas#aiChart{width:100%;display:block}
 .skel{background:linear-gradient(90deg,rgba(139,92,246,.06) 25%,rgba(139,92,246,.14) 50%,rgba(139,92,246,.06) 75%);background-size:200% 100%;animation:skelA 1.4s ease infinite;border-radius:8px;height:14px;margin-bottom:8px}
 @keyframes skelA{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* Creator badge */
-.creator-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(212,160,23,.08),rgba(212,160,23,.04));border:1px solid rgba(212,160,23,.22);border-radius:30px;padding:6px 16px 6px 10px;margin-top:12px;text-decoration:none}
-.creator-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#D4A017,#7c3aed);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.05em;flex-shrink:0}
-.creator-info{text-align:left}
-.creator-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.14em;color:#D4A017;display:block;line-height:1.2}
-.creator-role{font-size:8px;opacity:.38;letter-spacing:.1em;color:var(--text);text-transform:uppercase}
-
 /* ── FOOTER ── */
 footer{text-align:center;margin-top:36px;font-size:9px;line-height:1.9;color:var(--text)}
 
@@ -286,8 +279,9 @@ footer{text-align:center;margin-top:36px;font-size:9px;line-height:1.9;color:var
 .d1{animation-delay:.06s}.d2{animation-delay:.15s}.d3{animation-delay:.23s}
 .d4{animation-delay:.31s}.d5{animation-delay:.39s}.d6{animation-delay:.47s}.d7{animation-delay:.55s}
 
-@media(max-width:520px){.yg{grid-template-columns:1fr 1fr}.ins{grid-template-columns:1fr}.alerts-panel{width:100%}}
-@media(max-width:380px){.g2{grid-template-columns:1fr}}
+@media(max-width:768px){.page{padding:14px 12px 160px}.tl{gap:5px}.cb{font-size:9px;padding:6px 9px}.city-sel{font-size:9px}.strip{gap:10px}.cp{font-size:clamp(15px,3.5vw,22px)}.yg{grid-template-columns:repeat(2,1fr)}.alerts-panel{width:90%}}
+@media(max-width:520px){.page{padding:10px 10px 150px}.topbar{flex-direction:column;align-items:flex-start;gap:8px}.tl{width:100%;flex-wrap:wrap}.tr{width:100%;display:flex;justify-content:space-between;align-items:center}.cb{font-size:8px;padding:5px 8px}.city-sel{font-size:8px}.sl{font-size:8px}.strip{gap:7px}.si{font-size:8px}.g2{grid-template-columns:1fr 1fr;gap:8px}.rc{padding:12px 10px 10px;border-radius:10px}.cc{font-size:7px}.ck{font-size:9px}.cp{font-size:clamp(13px,4vw,19px)}.cs{font-size:8px}.bg2{font-size:8px;padding:2px 5px}.ci{font-size:14px;top:10px;right:9px}.subval{font-size:10px}.sublbl{font-size:8px}.yg{grid-template-columns:repeat(2,1fr);gap:6px}.yc{padding:8px 9px}.yv{font-size:11px}.yl{font-size:8px}.gw{padding:11px 9px 9px}.tab{font-size:8px;padding:5px 10px}.ai-panel{padding:14px 12px 12px}.ai-title{font-size:10px}.ai-icon{width:28px;height:28px;font-size:14px}.ai-cards{grid-template-columns:1fr 1fr 1fr;gap:5px}.ai-card{padding:9px 7px}.ai-card-price{font-size:11px}.ai-card-range{font-size:7px}.ai-card-lbl{font-size:7px}.ai-refresh-btn{font-size:8px;padding:5px 10px}.ins{grid-template-columns:1fr}.alerts-panel{width:100%;border-radius:0}.pop{border-radius:16px 16px 0 0}.kp{gap:5px;padding:0 12px}.k{padding:10px 0;font-size:11px}.fab{width:46px;height:46px;bottom:16px;right:14px}.ai-reasoning-text{font-size:10px}}
+@media(max-width:380px){.cp{font-size:clamp(12px,4.5vw,17px)}.strip{display:none}.cb{padding:5px 6px;font-size:7px}}
 </style>
 </head>
 <body>
@@ -333,13 +327,6 @@ footer{text-align:center;margin-top:36px;font-size:9px;line-height:1.9;color:var
   <header class="fu d1">
     <div class="sl" id="lbl-site">Live Precious Metals · India · MCX / GoodReturns Rates</div>
     <h1 id="lbl-h1">सोना · चांदी · प्लैटिनम · हीरा</h1>
-    <div class="creator-badge">
-      <div class="creator-avatar">BS</div>
-      <div class="creator-info">
-        <span class="creator-name">Bala Surya J</span>
-        <span class="creator-role">Creator &amp; Developer</span>
-      </div>
-    </div>
     <div class="strip">
       <span class="si">Spot Gold <b id="spotGold">$5,387/oz</b></span>
       <span class="si">Spot Silver <b id="spotSilv">$95.19/oz</b></span>
@@ -575,13 +562,9 @@ footer{text-align:center;margin-top:36px;font-size:9px;line-height:1.9;color:var
         <span style="opacity:.75">Actual prices may vary by city, local taxes (GST 3%), making charges &amp; jeweller pricing. <b style="opacity:.9">This site is for informational reference only. Always confirm with your jeweller or broker before any transaction.</b></span>
       </div>
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;opacity:.18;letter-spacing:.07em;">
-        Gold 22K ₹15,629/g · Gold 24K ₹17,050/g · Silver ₹315.10/g · Platinum ₹6,976/g · Diamond D-IF 1ct ₹7,50,000
-        <br style="margin-bottom:8px">
-        <span style="opacity:.9;font-size:10px;letter-spacing:.12em;">
-          Designed &amp; Developed by <b style="color:#D4A017;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;">Bala Surya J</b>
-        </span>
-        &nbsp;·&nbsp; © 2026 PreciousRates India · All Rights Reserved
+        Gold 22K ₹15,629/g · Gold 24K ₹17,050/g · Silver ₹315.10/g · Platinum ₹6,976/g · Diamond D-IF 1ct ₹7,50,000 · © 2026 PreciousRates India
       </div>
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(212,160,23,.14);display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap"><div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#D4A017,#7c3aed);display:flex;align-items:center;justify-content:center;font-family:Cinzel,serif;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 3px 16px rgba(212,160,23,.32)">BS</div><div><div style="font-family:Cinzel,serif;font-size:14px;letter-spacing:.24em;color:#D4A017;opacity:.85;margin-bottom:3px">Bala Surya J</div><div style="font-size:9px;opacity:.28;letter-spacing:.14em;text-transform:uppercase;color:var(--text)">Designed &amp; Developed &middot; PreciousRates India &middot; 2026</div></div></div>
     </div>
   </footer>
 </div>
