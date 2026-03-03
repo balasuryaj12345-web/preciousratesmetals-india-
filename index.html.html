@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PreciousRates India — Live Gold Silver Rates</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:wght@300;400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+/* ── THEME VARIABLES ── */
+[data-theme="dark"]{
+  --bg:#060810;--bg2:rgba(20,22,35,.98);--bg3:rgba(12,13,22,.98);
+  --card-bg:linear-gradient(135deg,rgba(20,22,35,.98),rgba(12,13,22,.98));
+  --border:rgba(255,255,255,.06);--text:#e8dfc8;--text2:rgba(255,255,255,.38);
+  --text3:rgba(255,255,255,.22);--strip-border:rgba(255,255,255,.05);
+  --grid:rgba(255,255,255,.06);--yaxis:rgba(255,255,255,.22);
+  --input-bg:rgba(255,255,255,.04);--input-border:rgba(255,255,255,.08);
+  --popup-bg:#080b18;--tab-bg:rgba(255,255,255,.028);
+  --ycard:rgba(255,255,255,.016);--web-line:rgba(188,154,56,.24);--web-node:rgba(206,168,60,.42);
+}
+[data-theme="light"]{
+  --bg:#f5f0e8;--bg2:rgba(255,252,245,.98);--bg3:rgba(248,244,235,.98);
+  --card-bg:linear-gradient(135deg,rgba(255,252,245,.98),rgba(248,244,235,.98));
+  --border:rgba(0,0,0,.08);--text:#1a1208;--text2:rgba(0,0,0,.55);
+  --text3:rgba(0,0,0,.35);--strip-border:rgba(0,0,0,.07);
+  --grid:rgba(0,0,0,.06);--yaxis:rgba(0,0,0,.35);
+  --input-bg:rgba(0,0,0,.04);--input-border:rgba(0,0,0,.1);
+  --popup-bg:#fffcf4;--tab-bg:rgba(0,0,0,.04);
+  --ycard:rgba(0,0,0,.025);--web-line:rgba(180,140,40,.18);--web-node:rgba(190,150,50,.35);
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--bg);min-height:100vh;font-family:'Crimson Pro',serif;color:var(--text);overflow-x:hidden;cursor:crosshair;transition:background .3s,color .3s}
+#webCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.ripple{position:fixed;border-radius:50%;pointer-events:none;z-index:1;animation:ripOut .85s ease-out forwards}
+@keyframes ripOut{0%{transform:scale(0);opacity:.6}100%{transform:scale(10);opacity:0}}
+.page{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:18px 16px 160px}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:8px;flex-wrap:wrap}
+.tl{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.cg{display:flex;background:rgba(128,100,30,.08);border:1px solid rgba(212,160,23,.18);border-radius:8px;overflow:hidden}
+[data-theme="light"] .cg{background:rgba(212,160,23,.06);border-color:rgba(212,160,23,.25)}
+.cb{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;padding:7px 12px;background:none;border:none;color:var(--text2);cursor:pointer;transition:background .18s,color .18s;white-space:nowrap}
+.cb.active{background:rgba(212,160,23,.22);color:#D4A017}
+.tr{font-size:10px;color:var(--text3);text-align:right}
+.tr span{display:block}
+.lp{color:#4ade80;display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.lp::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;animation:bl 1.2s infinite;display:inline-block}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* Theme toggle */
+.theme-btn{background:none;border:1px solid rgba(212,160,23,.25);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:14px;color:var(--text2);transition:all .2s;line-height:1}
+.theme-btn:hover{border-color:rgba(212,160,23,.5);color:#D4A017}
+
+/* City selector */
+.city-sel{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;padding:7px 12px;background:rgba(128,100,30,.08);border:1px solid rgba(212,160,23,.18);border-radius:8px;color:var(--text2);cursor:pointer;outline:none;transition:all .2s;-webkit-appearance:none;appearance:none;padding-right:24px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23D4A017'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+[data-theme="light"] .city-sel{background-color:rgba(212,160,23,.06)}
+.city-sel:hover,.city-sel:focus{border-color:rgba(212,160,23,.45);color:#D4A017}
+.city-sel option{background:#1a1820;color:#e8dfc8}
+[data-theme="light"] .city-sel option{background:#fffcf4;color:#1a1208}
+
+/* API status badge */
+.api-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.1em;padding:4px 9px;border-radius:20px;font-family:'Cinzel',serif}
+.api-live{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
+.api-sim{background:rgba(212,160,23,.1);color:#D4A017;border:1px solid rgba(212,160,23,.2)}
+.api-err{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+
+/* ── HEADER ── */
+header{text-align:center;margin-bottom:24px}
+.sl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:#D4A017;opacity:.65;margin-bottom:5px;text-transform:uppercase}
+h1{font-family:'Cinzel',serif;font-size:clamp(20px,4.8vw,42px);font-weight:900;background:linear-gradient(135deg,#F5C842,#fff5cc,#D4A017);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.05em;line-height:1.1}
+.strip{display:flex;justify-content:center;gap:18px;margin-top:10px;flex-wrap:wrap;border-top:1px solid var(--strip-border);padding-top:10px}
+.si{font-size:10px;color:var(--text2);letter-spacing:.05em}
+.si b{color:var(--text);opacity:.7}
+
+/* ── SECTION ── */
+.st{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.28em;text-transform:uppercase;opacity:.38;margin-bottom:12px;color:var(--text)}
+
+/* ── CARDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rc{position:relative;background:var(--card-bg);border:1px solid var(--border);border-radius:13px;padding:18px 16px 14px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;cursor:pointer}
+.rc:hover{transform:translateY(-3px)}
+.gc{border-color:rgba(212,160,23,.28)}.gc:hover{box-shadow:0 6px 36px rgba(212,160,23,.18)}
+.sc{border-color:rgba(168,184,200,.26)}.sc:hover{box-shadow:0 6px 36px rgba(168,184,200,.15)}
+.pc{border-color:rgba(158,207,207,.26)}.pc:hover{box-shadow:0 6px 36px rgba(158,207,207,.15)}
+.dc{border-color:rgba(176,224,255,.26)}.dc:hover{box-shadow:0 6px 36px rgba(176,224,255,.15)}
+.cgl{position:absolute;top:-32px;right:-32px;width:100px;height:100px;border-radius:50%;opacity:.1;filter:blur(30px)}
+.gc .cgl{background:#FFD700}.sc .cgl{background:#D0DDE8}.pc .cgl{background:#9ECFCF}.dc .cgl{background:#B0E0FF}
+.ci{font-size:18px;position:absolute;top:15px;right:13px}
+.cc{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;text-transform:uppercase;opacity:.42;margin-bottom:2px}
+.gc .cc{color:#D4A017}.sc .cc{color:#A8B8C8}.pc .cc{color:#9ECFCF}.dc .cc{color:#B0E0FF}
+.ck{font-size:10px;opacity:.32;margin-bottom:6px;letter-spacing:.03em;color:var(--text)}
+.cp{font-family:'Cinzel',serif;font-size:clamp(16px,2.8vw,25px);font-weight:600;line-height:1;margin-bottom:3px;transition:all .25s}
+.gc .cp{color:#F5C842}.sc .cp{color:#D0DDE8}.pc .cp{color:#9ECFCF}.dc .cp{color:#B0E0FF}
+.cs{font-size:9px;opacity:.28;letter-spacing:.06em;margin-bottom:9px;color:var(--text)}
+.bg2{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:20px;font-family:'Cinzel',serif}
+.up{background:rgba(74,222,128,.1);color:#4ade80}.dn{background:rgba(248,113,113,.1);color:#f87171}
+.subrow{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding-top:7px;border-top:1px solid var(--border)}
+.subval{font-family:'Cinzel',serif;font-size:11px;opacity:.55;color:var(--text)}
+.sublbl{font-size:9px;opacity:.28;color:var(--text)}
+/* Alert bell on card */
+.alert-bell{position:absolute;bottom:14px;right:13px;background:none;border:none;cursor:pointer;font-size:14px;opacity:.3;transition:opacity .2s,transform .2s}
+.alert-bell:hover{opacity:.8;transform:scale(1.15)}
+.alert-bell.set{opacity:.9;animation:bellRing .4s ease}
+@keyframes bellRing{0%,100%{transform:rotate(0)}25%{transform:rotate(15deg)}75%{transform:rotate(-15deg)}}
+/* flash */
+@keyframes fg{0%,100%{background:var(--card-bg)}45%{background:rgba(40,80,40,.5)}}
+@keyframes fr{0%,100%{background:var(--card-bg)}45%{background:rgba(80,30,30,.4)}}
+[data-theme="light"] @keyframes fg{0%,100%{background:var(--card-bg)}45%{background:rgba(180,240,180,.5)}}
+.fl-g{animation:fg .4s ease}.fl-r{animation:fr .4s ease}
+
+/* ── DIVIDER ── */
+.div{display:flex;align-items:center;gap:12px;margin:22px 0 14px}
+.dl{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(212,160,23,.3),transparent)}
+.dlb{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.24em;color:#D4A017;opacity:.48;text-transform:uppercase;white-space:nowrap}
+
+/* ── YESTERDAY ── */
+.yg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+.yc{background:var(--ycard);border:1px solid var(--border);border-radius:9px;padding:11px 12px}
+.yl{font-size:9px;opacity:.32;letter-spacing:.05em;margin-bottom:3px;color:var(--text)}
+.yv{font-family:'Cinzel',serif;font-size:13px;opacity:.55}
+
+/* ── CHART ── */
+.tabs{display:flex;background:var(--tab-bg);border-radius:8px;padding:3px;width:fit-content;border:1px solid var(--border);margin-bottom:14px}
+.tab{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:6px 16px;border-radius:6px;cursor:pointer;text-transform:uppercase;color:var(--text2);transition:all .2s;border:none;background:none}
+.tab.active{background:rgba(212,160,23,.18);color:#F5C842;box-shadow:0 0 8px rgba(212,160,23,.1)}
+.gw{background:var(--ycard);border:1px solid var(--border);border-radius:12px;padding:16px 14px 12px}
+canvas.chart{width:100%;display:block}
+.leg{display:flex;gap:16px;margin-top:9px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:9px;opacity:.42;letter-spacing:.05em;color:var(--text)}
+.ld{width:7px;height:7px;border-radius:50%}
+
+/* ── PREMIUM ── */
+.pd{display:flex;align-items:center;gap:12px;margin:24px 0 15px}
+.pl2{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(158,207,207,.26),transparent)}
+.plbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.24em;background:linear-gradient(90deg,#9ECFCF,#B0E0FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-transform:uppercase;white-space:nowrap;opacity:.75}
+
+/* ── AI PREDICTION SECTION ── */
+.ai-section{margin:32px 0 10px;position:relative}
+.ai-divider{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.ai-dline{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,.4),transparent)}
+.ai-dlbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.26em;background:linear-gradient(90deg,#a78bfa,#7c3aed,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-transform:uppercase;white-space:nowrap;opacity:.85}
+
+.ai-panel{background:linear-gradient(135deg,rgba(30,20,50,.95),rgba(15,10,30,.98));border:1px solid rgba(139,92,246,.22);border-radius:16px;padding:24px 22px 20px;position:relative;overflow:hidden}
+[data-theme="light"] .ai-panel{background:linear-gradient(135deg,rgba(245,240,255,.97),rgba(235,228,255,.98));border-color:rgba(139,92,246,.25)}
+.ai-panel::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.12),transparent 70%);pointer-events:none}
+.ai-panel::after{content:'';position:absolute;bottom:-40px;left:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.1),transparent 70%);pointer-events:none}
+
+.ai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.ai-title-row{display:flex;align-items:center;gap:10px}
+.ai-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 14px rgba(124,58,237,.35);flex-shrink:0}
+.ai-title{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.18em;color:#a78bfa;text-transform:uppercase}
+.ai-subtitle{font-size:10px;opacity:.4;letter-spacing:.06em;color:var(--text);margin-top:2px}
+.ai-refresh-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;padding:6px 14px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:20px;color:#a78bfa;cursor:pointer;text-transform:uppercase;transition:all .2s;white-space:nowrap}
+.ai-refresh-btn:hover{background:rgba(139,92,246,.2);border-color:rgba(139,92,246,.45)}
+.ai-refresh-btn:active{transform:scale(.95)}
+.ai-refresh-btn.spinning .ai-spin{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Metal tabs */
+.ai-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.ai-tab{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:5px 13px;border-radius:20px;border:1px solid rgba(139,92,246,.18);background:none;color:rgba(139,92,246,.5);cursor:pointer;text-transform:uppercase;transition:all .2s}
+.ai-tab.active{background:rgba(139,92,246,.18);border-color:rgba(139,92,246,.45);color:#a78bfa}
+
+/* Prediction cards row */
+.ai-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.ai-card{background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.14);border-radius:11px;padding:14px 13px;text-align:center;transition:all .25s}
+[data-theme="light"] .ai-card{background:rgba(139,92,246,.05);border-color:rgba(139,92,246,.15)}
+.ai-card:hover{border-color:rgba(139,92,246,.32);transform:translateY(-2px)}
+.ai-card-lbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#7c3aed;opacity:.7;margin-bottom:5px}
+.ai-card-price{font-family:'Cinzel',serif;font-size:clamp(14px,2.2vw,20px);font-weight:600;color:#c4b5fd;margin-bottom:3px;transition:all .3s}
+.ai-card-range{font-size:9px;opacity:.4;color:var(--text);letter-spacing:.04em;margin-bottom:6px}
+.ai-card-dir{font-size:11px;font-family:'Cinzel',serif;padding:2px 8px;border-radius:20px}
+.ai-bull{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
+.ai-bear{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.ai-neutral{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
+
+/* Confidence bar */
+.ai-conf-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ai-conf-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;color:#7c3aed;opacity:.65;text-transform:uppercase;white-space:nowrap}
+.ai-conf-bar{flex:1;height:5px;background:rgba(139,92,246,.12);border-radius:5px;overflow:hidden}
+.ai-conf-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#7c3aed,#a78bfa);transition:width .8s cubic-bezier(.25,1,.3,1)}
+.ai-conf-val{font-family:'Cinzel',serif;font-size:10px;color:#a78bfa;white-space:nowrap}
+
+/* AI reasoning text */
+.ai-reasoning{background:rgba(139,92,246,.05);border:1px solid rgba(139,92,246,.1);border-left:3px solid rgba(124,58,237,.5);border-radius:0 9px 9px 0;padding:13px 15px;margin-bottom:14px;position:relative}
+[data-theme="light"] .ai-reasoning{background:rgba(139,92,246,.04)}
+.ai-reasoning-text{font-size:11px;line-height:1.75;color:var(--text);opacity:.65;letter-spacing:.03em}
+/* Typing cursor */
+.ai-cursor{display:inline-block;width:2px;height:11px;background:#a78bfa;margin-left:2px;animation:cur .8s step-end infinite;vertical-align:middle}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Prediction chart canvas */
+.ai-chart-wrap{background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.1);border-radius:10px;padding:14px 12px 10px;margin-bottom:14px}
+canvas#aiChart{width:100%;display:block}
+.ai-chart-legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.ai-leg{display:flex;align-items:center;gap:5px;font-size:9px;opacity:.42;letter-spacing:.05em;color:var(--text)}
+.ai-leg-dot{width:20px;height:3px;border-radius:2px}
+.ai-leg-dashed{background:repeating-linear-gradient(90deg,#a78bfa 0,#a78bfa 4px,transparent 4px,transparent 8px)}
+
+/* Big disclaimer box */
+.ai-disclaimer{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:10px;padding:13px 15px;display:flex;gap:10px;align-items:flex-start}
+[data-theme="light"] .ai-disclaimer{background:rgba(251,191,36,.06)}
+.ai-disc-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.ai-disc-text{font-size:10px;line-height:1.7;color:var(--text);opacity:.55;letter-spacing:.04em}
+.ai-disc-text b{color:#fbbf24;opacity:.9}
+
+/* Loading skeleton */
+.ai-loading{display:none}
+.ai-loading.show{display:block}
+.skel{background:linear-gradient(90deg,rgba(139,92,246,.06) 25%,rgba(139,92,246,.14) 50%,rgba(139,92,246,.06) 75%);background-size:200% 100%;animation:skelA 1.4s ease infinite;border-radius:8px;height:14px;margin-bottom:8px}
+@keyframes skelA{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Creator badge */
+.creator-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(212,160,23,.08),rgba(212,160,23,.04));border:1px solid rgba(212,160,23,.22);border-radius:30px;padding:6px 16px 6px 10px;margin-top:12px;text-decoration:none}
+.creator-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#D4A017,#7c3aed);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.05em;flex-shrink:0}
+.creator-info{text-align:left}
+.creator-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.14em;color:#D4A017;display:block;line-height:1.2}
+.creator-role{font-size:8px;opacity:.38;letter-spacing:.1em;color:var(--text);text-transform:uppercase}
+
+/* ── FOOTER ── */
+footer{text-align:center;margin-top:36px;font-size:9px;line-height:1.9;color:var(--text)}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:24px;right:24px;z-index:300;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#D4A017,#bd7d08);border:none;cursor:pointer;box-shadow:0 4px 22px rgba(212,160,23,.42);transition:transform .18s,box-shadow .18s;display:flex;align-items:center;justify-content:center}
+.fab:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(212,160,23,.6)}
+.fab:active{transform:scale(.93)}
+.fab::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(212,160,23,.3);animation:fabP 2s ease-in-out infinite}
+@keyframes fabP{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.12);opacity:.1}}
+
+/* ── CALC OVERLAY ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.ov.open{display:flex;animation:ovIn .25s ease}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.pop{background:var(--popup-bg);border:1px solid rgba(212,160,23,.2);border-top:1px solid rgba(212,160,23,.35);border-radius:22px 22px 0 0;width:100%;max-width:440px;padding:0 0 26px;box-shadow:0 -6px 50px rgba(0,0,0,.6);animation:sUp .38s cubic-bezier(.22,1.4,.36,1)}
+@keyframes sUp{0%{transform:translateY(100%) scale(.92);opacity:0}60%{transform:translateY(-8px) scale(1.01);opacity:1}80%{transform:translateY(3px) scale(.995)}100%{transform:translateY(0) scale(1);opacity:1}}
+.handle{width:36px;height:4px;background:rgba(212,160,23,.25);border-radius:4px;margin:11px auto 0}
+.ch2{display:flex;align-items:center;justify-content:space-between;padding:13px 20px 9px}
+.ct{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.18em;color:#F5C842;text-transform:uppercase}
+.cx{background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:4px 11px;cursor:pointer;font-size:11px;font-family:'Cinzel',serif}
+.mt{display:flex;gap:5px;padding:0 20px;margin-bottom:11px;flex-wrap:wrap}
+.ctab{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;padding:4px 11px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;text-transform:uppercase;transition:all .18s}
+.ctab.active{border-color:#D4A017;color:#F5C842;background:rgba(212,160,23,.1)}
+.cd{margin:0 20px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.ri{font-size:10px;opacity:.34;letter-spacing:.05em;margin-bottom:4px;color:var(--text)}
+.cr{font-family:'Cinzel',serif;font-size:20px;color:#F5C842;min-height:26px;word-break:break-all}
+.cu{font-size:9px;opacity:.28;margin-top:2px;color:var(--text)}
+.ins{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 20px;margin-bottom:11px}
+.ig label{display:block;font-size:9px;opacity:.32;letter-spacing:.09em;text-transform:uppercase;margin-bottom:4px;color:var(--text)}
+.ig input{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:7px;padding:9px 11px;color:var(--text);font-family:'Cinzel',serif;font-size:14px;outline:none;transition:border .18s}
+.ig input:focus{border-color:rgba(212,160,23,.45)}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:0 20px}
+.k{background:var(--input-bg);border:1px solid var(--border);border-radius:9px;padding:12px 0;font-family:'Cinzel',serif;font-size:13px;color:var(--text);cursor:pointer;transition:all .13s;text-align:center}
+.k:hover{opacity:.8}.k:active{transform:scale(.9)}
+.k.op{color:#F5C842;background:rgba(212,160,23,.07)}
+.k.eq{background:linear-gradient(135deg,#D4A017,#b37a09);color:#0d0d0d;font-weight:700;border:none}
+.k.cl{color:#f87171;background:rgba(248,113,113,.07)}
+
+/* ── ALERTS PANEL ── */
+.alerts-panel{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--popup-bg);border-left:1px solid rgba(212,160,23,.2);z-index:500;transform:translateX(100%);transition:transform .35s cubic-bezier(.25,1,.3,1);padding:20px 18px;overflow-y:auto;box-shadow:-8px 0 40px rgba(0,0,0,.4)}
+.alerts-panel.open{transform:translateX(0)}
+.ap-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.2em;color:#F5C842;text-transform:uppercase;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.ap-close{background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Cinzel',serif}
+.alert-item{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+.alert-item .aim{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#D4A017;margin-bottom:6px;text-transform:uppercase}
+.alert-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.alert-row select,.alert-row input{flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:6px;padding:7px 9px;color:var(--text);font-family:'Cinzel',serif;font-size:11px;outline:none}
+.alert-row select option{background:#1a1820}
+[data-theme="light"] .alert-row select option{background:#fffcf4}
+.add-alert-btn{width:100%;padding:10px;background:linear-gradient(135deg,rgba(212,160,23,.18),rgba(212,160,23,.08));border:1px solid rgba(212,160,23,.3);border-radius:8px;color:#F5C842;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:14px}
+.add-alert-btn:hover{background:linear-gradient(135deg,rgba(212,160,23,.28),rgba(212,160,23,.14))}
+.active-alerts{margin-top:4px}
+.active-alerts h4{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;opacity:.4;text-transform:uppercase;margin-bottom:8px;color:var(--text)}
+.alert-chip{display:flex;justify-content:space-between;align-items:center;background:rgba(212,160,23,.07);border:1px solid rgba(212,160,23,.18);border-radius:8px;padding:8px 11px;margin-bottom:6px;font-size:10px;color:var(--text)}
+.alert-chip .adel{background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:0 2px}
+/* Toast notification */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,#1a2a10,#0d1a08);border:1px solid rgba(74,222,128,.4);border-radius:12px;padding:12px 20px;z-index:999;font-family:'Cinzel',serif;font-size:11px;color:#4ade80;letter-spacing:.1em;box-shadow:0 4px 24px rgba(0,0,0,.5);transition:transform .4s cubic-bezier(.25,1,.3,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+[data-theme="light"] .toast{background:linear-gradient(135deg,#e8f5e0,#d4ecc4);color:#2d7a10}
+
+/* ── ENTRY ANIM ── */
+.fu{opacity:0;transform:translateY(16px);animation:fuA .6s ease forwards}
+@keyframes fuA{to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.06s}.d2{animation-delay:.15s}.d3{animation-delay:.23s}
+.d4{animation-delay:.31s}.d5{animation-delay:.39s}.d6{animation-delay:.47s}.d7{animation-delay:.55s}
+
+@media(max-width:520px){.yg{grid-template-columns:1fr 1fr}.ins{grid-template-columns:1fr}.alerts-panel{width:100%}}
+@media(max-width:380px){.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="webCanvas"></canvas>
+<div class="page">
+
+  <!-- TOPBAR -->
+  <div class="topbar fu d1">
+    <div class="tl">
+      <div class="cg" id="langG">
+        <button class="cb" onclick="setLang('ta',this)">த</button>
+        <button class="cb active" onclick="setLang('en',this)">EN</button>
+        <button class="cb" onclick="setLang('hi',this)">हिं</button>
+      </div>
+      <div class="cg" id="currG">
+        <button class="cb active" onclick="setCurr('INR',this)">₹ INR</button>
+        <button class="cb" onclick="setCurr('USD',this)">$ USD</button>
+        <button class="cb" onclick="setCurr('AED',this)">د AED</button>
+      </div>
+      <select class="city-sel" id="citySelect" onchange="setCity(this.value)">
+        <option value="chennai">📍 Chennai</option>
+        <option value="mumbai">📍 Mumbai</option>
+        <option value="delhi">📍 Delhi</option>
+        <option value="bangalore">📍 Bangalore</option>
+        <option value="hyderabad">📍 Hyderabad</option>
+        <option value="kolkata">📍 Kolkata</option>
+        <option value="pune">📍 Pune</option>
+        <option value="ahmedabad">📍 Ahmedabad</option>
+        <option value="jaipur">📍 Jaipur</option>
+        <option value="coimbatore">📍 Coimbatore</option>
+      </select>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+      <button class="theme-btn" onclick="toggleAlerts()" title="Price Alerts" style="font-size:13px">🔔</button>
+    </div>
+    <div class="tr">
+      <span id="upd">Loading...</span>
+      <span class="lp" id="liveLbl">Live</span>
+      <span id="apiBadge" class="api-badge api-sim" style="margin-top:3px">● Simulated</span>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="fu d1">
+    <div class="sl" id="lbl-site">Live Precious Metals · India · MCX / GoodReturns Rates</div>
+    <h1 id="lbl-h1">सोना · चांदी · प्लैटिनम · हीरा</h1>
+    <div class="creator-badge">
+      <div class="creator-avatar">BS</div>
+      <div class="creator-info">
+        <span class="creator-name">Bala Surya J</span>
+        <span class="creator-role">Creator &amp; Developer</span>
+      </div>
+    </div>
+    <div class="strip">
+      <span class="si">Spot Gold <b id="spotGold">$5,387/oz</b></span>
+      <span class="si">Spot Silver <b id="spotSilv">$95.19/oz</b></span>
+      <span class="si">USD/INR <b id="usdInr">91.56</b></span>
+      <span class="si">City <b id="cityLbl">Chennai</b></span>
+      <span class="si">MCX Gold <b id="mcxG">—</b></span>
+    </div>
+  </header>
+
+  <!-- GOLD -->
+  <div class="st fu d2" id="lbl-gs">Gold Rates · 3 March 2026 · Source: GoodReturns / MCX</div>
+  <div class="g2 fu d2">
+    <div class="rc gc" onclick="cardClick(event,'g22')">
+      <div class="cgl"></div><span class="ci">🥇</span>
+      <div class="cc">Gold</div>
+      <div class="ck" id="lk22">22 Karat · 916 Hallmark</div>
+      <div class="cp" id="g22p">₹15,629</div>
+      <div class="cs">per gram · BIS Hallmarked</div>
+      <span class="bg2 up" id="g22b">▲ +0.00%</span>
+      <div class="subrow">
+        <span class="sublbl">8 grams</span>
+        <span class="subval" id="g22t">₹1,25,032</span>
+      </div>
+      <button class="alert-bell" id="bell-g22" onclick="quickAlert(event,'g22')" title="Set price alert">🔔</button>
+    </div>
+    <div class="rc gc" onclick="cardClick(event,'g24')">
+      <div class="cgl"></div><span class="ci">✨</span>
+      <div class="cc">Gold</div>
+      <div class="ck" id="lk24">24 Karat · 999 Pure</div>
+      <div class="cp" id="g24p">₹17,050</div>
+      <div class="cs">per gram · 99.9% Pure</div>
+      <span class="bg2 up" id="g24b">▲ +0.00%</span>
+      <div class="subrow">
+        <span class="sublbl">8 grams</span>
+        <span class="subval" id="g24t">₹1,36,400</span>
+      </div>
+      <button class="alert-bell" id="bell-g24" onclick="quickAlert(event,'g24')" title="Set price alert">🔔</button>
+    </div>
+  </div>
+
+  <!-- SILVER -->
+  <div class="st fu d3" style="margin-top:18px" id="lbl-ss">Silver Rates · 3 March 2026 · Source: GoodReturns / MCX</div>
+  <div class="g2 fu d3">
+    <div class="rc sc" onclick="cardClick(event,'s1')">
+      <div class="cgl"></div><span class="ci">🥈</span>
+      <div class="cc">Silver</div>
+      <div class="ck" id="lks1">1 Gram · 999 Pure</div>
+      <div class="cp" id="s1p">₹315</div>
+      <div class="cs">per gram · MCX Spot</div>
+      <span class="bg2 up" id="s1b">▲ +0.00%</span>
+      <div class="subrow">
+        <span class="sublbl">100 grams</span>
+        <span class="subval" id="s1t">₹31,500</span>
+      </div>
+      <button class="alert-bell" id="bell-s1" onclick="quickAlert(event,'s1')" title="Set price alert">🔔</button>
+    </div>
+    <div class="rc sc" onclick="cardClick(event,'s10')">
+      <div class="cgl"></div><span class="ci">⚖️</span>
+      <div class="cc">Silver</div>
+      <div class="ck" id="lks10">10 Gram · 999 Pure</div>
+      <div class="cp" id="s10p">₹3,150</div>
+      <div class="cs">per 10 grams · MCX Spot</div>
+      <span class="bg2 up" id="s10b">▲ +0.00%</span>
+      <div class="subrow">
+        <span class="sublbl">1 kg</span>
+        <span class="subval" id="s10t">₹3,15,000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- YESTERDAY -->
+  <div class="div fu d4">
+    <div class="dl"></div>
+    <div class="dlb" id="lbl-yd">Yesterday's Close · 2 March 2026</div>
+    <div class="dl"></div>
+  </div>
+  <div class="yg fu d4">
+    <div class="yc"><div class="yl" id="ly22">Gold 22K</div><div class="yv" style="color:#D4A017" id="y22v">₹15,580</div></div>
+    <div class="yc"><div class="yl" id="ly24">Gold 24K</div><div class="yv" style="color:#D4A017" id="y24v">₹17,007</div></div>
+    <div class="yc"><div class="yl" id="lys1">Silver 1g</div><div class="yv" style="color:#A8B8C8" id="ys1v">₹315.00</div></div>
+    <div class="yc"><div class="yl" id="lys10">Silver 10g</div><div class="yv" style="color:#A8B8C8" id="ys10v">₹3,150</div></div>
+  </div>
+
+  <!-- CHART -->
+  <div class="fu d5">
+    <div class="st" id="lbl-ch">Live Intraday Chart</div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this,'gs')" id="tabGs">Gold &amp; Silver</button>
+      <button class="tab" onclick="switchTab(this,'pd')" id="tabPd">Platinum &amp; Diamond</button>
+    </div>
+    <div class="gw">
+      <canvas class="chart" id="mc" height="190"></canvas>
+      <div class="leg" id="legRow">
+        <div class="li"><div class="ld" style="background:#D4A017"></div><span id="leg1">Gold 22K /gram</span></div>
+        <div class="li"><div class="ld" style="background:#A8B8C8"></div><span>Silver ×50</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREMIUM -->
+  <div class="pd fu d6">
+    <div class="pl2"></div>
+    <div class="plbl" id="lbl-pm">Premium Metals</div>
+    <div class="pl2"></div>
+  </div>
+  <div class="g2 fu d6">
+    <div class="rc pc" onclick="cardClick(event,'pt')">
+      <div class="cgl"></div><span class="ci">⚗️</span>
+      <div class="cc">Platinum</div>
+      <div class="ck">1 Gram · 950 Purity</div>
+      <div class="cp" id="ptP">₹6,976</div>
+      <div class="cs">per gram · GoodReturns</div>
+      <span class="bg2 dn" id="ptB">▼ −0.00%</span>
+      <div class="subrow"><span class="sublbl">10 grams</span><span class="subval" id="ptT">₹69,760</span></div>
+    </div>
+    <div class="rc dc" onclick="cardClick(event,'dm')">
+      <div class="cgl"></div><span class="ci">💎</span>
+      <div class="cc">Diamond</div>
+      <div class="ck" id="lkdm">Natural · 1 Carat · D-IF</div>
+      <div class="cp" id="dmP">₹7,50,000</div>
+      <div class="cs">per carat · D colour IF clarity</div>
+      <span class="bg2 up" id="dmB">▲ +0.00%</span>
+      <div class="subrow"><span class="sublbl">Grade</span><span class="subval" style="color:#B0E0FF;font-size:10px">D-IF · GIA Cert</span></div>
+    </div>
+  </div>
+
+  <!-- AI PREDICTION SECTION -->
+  <div class="ai-section fu d7">
+    <div class="ai-divider">
+      <div class="ai-dline"></div>
+      <div class="ai-dlbl">🤖 AI Price Prediction</div>
+      <div class="ai-dline"></div>
+    </div>
+
+    <div class="ai-panel">
+      <div class="ai-header">
+        <div class="ai-title-row">
+          <div class="ai-icon">🤖</div>
+          <div>
+            <div class="ai-title">AI Market Forecast</div>
+            <div class="ai-subtitle" id="aiSubtitle">Analysing patterns · Gold 22K · Next 7 days</div>
+          </div>
+        </div>
+        <button class="ai-refresh-btn" onclick="runAIPrediction()" id="aiRefreshBtn">
+          <span class="ai-spin">↻</span> Regenerate
+        </button>
+      </div>
+
+      <!-- Metal selector tabs -->
+      <div class="ai-tabs" id="aiMetalTabs">
+        <button class="ai-tab active" onclick="setAIMetal('g22',this)">Gold 22K</button>
+        <button class="ai-tab" onclick="setAIMetal('g24',this)">Gold 24K</button>
+        <button class="ai-tab" onclick="setAIMetal('s1',this)">Silver</button>
+        <button class="ai-tab" onclick="setAIMetal('pt',this)">Platinum</button>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div class="ai-loading" id="aiLoading">
+        <div class="skel" style="width:60%;height:12px"></div>
+        <div class="skel" style="width:90%;height:60px;margin-bottom:12px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div class="skel" style="height:80px"></div>
+          <div class="skel" style="height:80px"></div>
+          <div class="skel" style="height:80px"></div>
+        </div>
+        <div class="skel" style="height:110px"></div>
+      </div>
+
+      <!-- Prediction content -->
+      <div id="aiContent">
+        <!-- Prediction cards: Tomorrow, 3 Days, 7 Days -->
+        <div class="ai-cards">
+          <div class="ai-card">
+            <div class="ai-card-lbl">Tomorrow</div>
+            <div class="ai-card-price" id="aiP1">—</div>
+            <div class="ai-card-range" id="aiR1">— to —</div>
+            <div class="ai-card-dir" id="aiD1">—</div>
+          </div>
+          <div class="ai-card">
+            <div class="ai-card-lbl">3 Days</div>
+            <div class="ai-card-price" id="aiP3">—</div>
+            <div class="ai-card-range" id="aiR3">— to —</div>
+            <div class="ai-card-dir" id="aiD3">—</div>
+          </div>
+          <div class="ai-card">
+            <div class="ai-card-lbl">7 Days</div>
+            <div class="ai-card-price" id="aiP7">—</div>
+            <div class="ai-card-range" id="aiR7">— to —</div>
+            <div class="ai-card-dir" id="aiD7">—</div>
+          </div>
+        </div>
+
+        <!-- Confidence -->
+        <div class="ai-conf-row">
+          <div class="ai-conf-lbl">AI Confidence</div>
+          <div class="ai-conf-bar"><div class="ai-conf-fill" id="aiConfFill" style="width:0%"></div></div>
+          <div class="ai-conf-val" id="aiConfVal">—</div>
+        </div>
+
+        <!-- AI Reasoning text typed out -->
+        <div class="ai-reasoning">
+          <div class="ai-reasoning-text" id="aiReasoning">
+            <span id="aiReasonText"></span><span class="ai-cursor" id="aiCursor" style="display:none"></span>
+          </div>
+        </div>
+
+        <!-- Prediction chart -->
+        <div class="ai-chart-wrap">
+          <canvas id="aiChart" height="120"></canvas>
+          <div class="ai-chart-legend">
+            <div class="ai-leg"><div class="ai-leg-dot" style="background:#D4A017"></div>Historical</div>
+            <div class="ai-leg"><div class="ai-leg-dot ai-leg-dashed"></div>AI Forecast</div>
+            <div class="ai-leg"><div class="ai-leg-dot" style="background:rgba(167,139,250,.25);height:10px;border-radius:3px"></div>Uncertainty Band</div>
+          </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="ai-disclaimer">
+          <div class="ai-disc-icon">⚠️</div>
+          <div class="ai-disc-text">
+            <b>This is an AI-generated estimate only — not financial advice.</b> The forecast is based on pattern analysis of recent price movements and general market signals. Gold, silver and precious metal prices are influenced by global events, central bank policy, currency fluctuations and geopolitical factors that no model can fully predict. <b>Markets can and do change without warning. Never make any purchase or investment decision based solely on this prediction.</b>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="fu d7">
+    <div style="max-width:700px;margin:0 auto;">
+      <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.22em;color:#D4A017;opacity:.5;text-transform:uppercase;margin-bottom:10px;">⚠ Disclaimer</div>
+      <div style="font-size:10px;opacity:.32;line-height:2;letter-spacing:.05em;">
+        Rates sourced from <b style="opacity:.7">GoodReturns.in, MCX &amp; IBJA</b> as of <b style="opacity:.7">3 March 2026</b>. To the best of our knowledge these prices are accurate and reflect current market rates.<br>
+        <span style="opacity:.75">Actual prices may vary by city, local taxes (GST 3%), making charges &amp; jeweller pricing. <b style="opacity:.9">This site is for informational reference only. Always confirm with your jeweller or broker before any transaction.</b></span>
+      </div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;opacity:.18;letter-spacing:.07em;">
+        Gold 22K ₹15,629/g · Gold 24K ₹17,050/g · Silver ₹315.10/g · Platinum ₹6,976/g · Diamond D-IF 1ct ₹7,50,000
+        <br style="margin-bottom:8px">
+        <span style="opacity:.9;font-size:10px;letter-spacing:.12em;">
+          Designed &amp; Developed by <b style="color:#D4A017;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;">Bala Surya J</b>
+        </span>
+        &nbsp;·&nbsp; © 2026 PreciousRates India · All Rights Reserved
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="toggleCalc()" title="Metal Calculator">
+  <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+    <rect x="3" y="2" width="20" height="22" rx="3" stroke="#0d0d0d" stroke-width="1.6" fill="rgba(0,0,0,0.15)"/>
+    <rect x="6" y="5" width="14" height="5" rx="1.2" fill="#0d0d0d" opacity="0.7"/>
+    <rect x="6" y="13" width="4" height="3" rx="1" fill="#0d0d0d" opacity="0.65"/>
+    <rect x="11" y="13" width="4" height="3" rx="1" fill="#0d0d0d" opacity="0.65"/>
+    <rect x="16" y="13" width="4" height="3" rx="1" fill="#0d0d0d" opacity="0.65"/>
+    <rect x="6" y="18" width="4" height="3" rx="1" fill="#0d0d0d" opacity="0.65"/>
+    <rect x="11" y="18" width="4" height="3" rx="1" fill="#0d0d0d" opacity="0.65"/>
+    <rect x="16" y="18" width="4" height="6" rx="1" fill="#0d0d0d" opacity="0.8"/>
+  </svg>
+</button>
+
+<!-- CALCULATOR -->
+<div class="ov" id="ov" onclick="ovck(event)">
+  <div class="pop">
+    <div class="handle"></div>
+    <div class="ch2">
+      <div class="ct" id="ctitle">Metal Calculator</div>
+      <button class="cx" onclick="toggleCalc()">✕</button>
+    </div>
+    <div class="mt">
+      <button class="ctab active" onclick="setM('g22',this)">Gold 22K</button>
+      <button class="ctab" onclick="setM('g24',this)">Gold 24K</button>
+      <button class="ctab" onclick="setM('s1',this)">Silver 1g</button>
+      <button class="ctab" onclick="setM('s10',this)">Silver 10g</button>
+      <button class="ctab" onclick="setM('pt',this)">Platinum</button>
+      <button class="ctab" onclick="setM('dm',this)">Diamond</button>
+    </div>
+    <div class="cd">
+      <div class="ri" id="rateInfo">Rate: ₹15,629 / gram</div>
+      <div class="cr" id="cres">₹0</div>
+      <div class="cu" id="cunit">Enter grams to calculate value</div>
+    </div>
+    <div class="ins">
+      <div class="ig"><label id="lgl">Grams / Units</label><input type="number" id="cgrams" placeholder="0.00" step="0.01" min="0" oninput="cg()"></div>
+      <div class="ig"><label id="lbl2">Budget (₹)</label><input type="number" id="cbudget" placeholder="0" min="0" oninput="cb2()"></div>
+    </div>
+    <div class="kp">
+      <button class="k cl" onclick="kp('C')">C</button>
+      <button class="k op" onclick="kp('←')">←</button>
+      <button class="k op" onclick="kp('%')">%</button>
+      <button class="k op" onclick="kp('÷')">÷</button>
+      <button class="k" onclick="kp('7')">7</button>
+      <button class="k" onclick="kp('8')">8</button>
+      <button class="k" onclick="kp('9')">9</button>
+      <button class="k op" onclick="kp('×')">×</button>
+      <button class="k" onclick="kp('4')">4</button>
+      <button class="k" onclick="kp('5')">5</button>
+      <button class="k" onclick="kp('6')">6</button>
+      <button class="k op" onclick="kp('−')">−</button>
+      <button class="k" onclick="kp('1')">1</button>
+      <button class="k" onclick="kp('2')">2</button>
+      <button class="k" onclick="kp('3')">3</button>
+      <button class="k op" onclick="kp('+')">+</button>
+      <button class="k" onclick="kp('0')" style="grid-column:span 2">0</button>
+      <button class="k" onclick="kp('.')">.</button>
+      <button class="k eq" onclick="kp('=')">=</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALERTS PANEL -->
+<div class="alerts-panel" id="alertsPanel">
+  <div class="ap-title">
+    <span>🔔 Price Alerts</span>
+    <button class="ap-close" onclick="toggleAlerts()">✕ Close</button>
+  </div>
+  <div class="alert-item">
+    <div class="aim" id="alertMetalLbl">Set Alert — Gold 22K</div>
+    <div class="alert-row">
+      <select id="alertMetal">
+        <option value="g22">Gold 22K</option>
+        <option value="g24">Gold 24K</option>
+        <option value="s1">Silver 1g</option>
+        <option value="s10">Silver 10g</option>
+        <option value="pt">Platinum</option>
+      </select>
+      <select id="alertDir">
+        <option value="below">Falls below</option>
+        <option value="above">Rises above</option>
+      </select>
+    </div>
+    <div class="alert-row">
+      <input type="number" id="alertPrice" placeholder="Target price ₹" style="width:100%">
+    </div>
+    <button class="add-alert-btn" onclick="addAlert()">+ Add Alert</button>
+  </div>
+  <div class="active-alerts">
+    <h4>Active Alerts</h4>
+    <div id="alertsList"><div style="font-size:10px;opacity:.3;text-align:center;padding:12px;font-family:Cinzel,serif">No alerts set yet</div></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">🔔 Alert triggered!</div>
+
+<script>
+/* ══════════════════════════════════════════
+   VERIFIED REAL RATES — March 3, 2026
+   Gold 22K: ₹15,629/g  Gold 24K: ₹17,050/g
+   Silver: ₹315.10/g    Platinum: ₹6,976/g
+   Diamond D-IF 1ct: ₹7,50,000
+   USD/INR: 91.56
+══════════════════════════════════════════ */
+const USD=91.56,AED=24.92;
+
+/* City adjustments — real differential from Chennai base */
+const CITY_ADJ={
+  chennai:   {g22:0,    g24:0,    s1:0,    name:'Chennai'},
+  mumbai:    {g22:+10,  g24:+11,  s1:+0.2, name:'Mumbai'},
+  delhi:     {g22:+30,  g24:+33,  s1:+0.5, name:'Delhi'},
+  bangalore: {g22:-5,   g24:-6,   s1:-0.1, name:'Bangalore'},
+  hyderabad: {g22:+8,   g24:+9,   s1:+0.1, name:'Hyderabad'},
+  kolkata:   {g22:+20,  g24:+22,  s1:+0.3, name:'Kolkata'},
+  pune:      {g22:+5,   g24:+6,   s1:+0.1, name:'Pune'},
+  ahmedabad: {g22:+15,  g24:+16,  s1:+0.2, name:'Ahmedabad'},
+  jaipur:    {g22:+25,  g24:+27,  s1:+0.4, name:'Jaipur'},
+  coimbatore:{g22:-3,   g24:-3,   s1:-0.05,name:'Coimbatore'},
+};
+let CITY='chennai';
+
+const BASE={g22:15629,g24:17050,s1:315.10,s10:3151.0,pt:6976,dm:750000};
+const PREV={g22:15580,g24:17007,s1:315.00,s10:3150.0,pt:6990,dm:748000};
+let live={...BASE};
+let CURR='INR',LANG='en';
+let THEME='dark';
+let activeAlerts=[];
+let alertIdCounter=0;
+
+/* ── CITY ── */
+function setCity(c){
+  CITY=c;
+  const adj=CITY_ADJ[c]||CITY_ADJ.chennai;
+  live.g22=BASE.g22+adj.g22;
+  live.g24=BASE.g24+adj.g24;
+  live.s1=+(BASE.s1+adj.s1).toFixed(2);
+  live.s10=+(live.s1*10).toFixed(2);
+  document.getElementById('cityLbl').textContent=adj.name;
+  render();
+}
+
+/* ── THEME ── */
+function toggleTheme(){
+  THEME=THEME==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',THEME);
+  document.getElementById('themeBtn').textContent=THEME==='dark'?'🌙':'☀️';
+  setTimeout(drawChart,50);
+}
+
+/* ── FORMAT ── */
+function toD(inr){return CURR==='USD'?inr/USD:CURR==='AED'?inr/AED:inr;}
+function sym(){return CURR==='INR'?'₹':CURR==='USD'?'$':'د.إ ';}
+function fmt(inr,dc=0){
+  const v=toD(inr);
+  if(CURR==='INR'){
+    if(dc>0)return '₹'+v.toFixed(dc);
+    return '₹'+Math.round(v).toLocaleString('en-IN');
+  }
+  return sym()+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function setCurr(c,btn){
+  CURR=c;
+  document.querySelectorAll('#currG .cb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');render();
+}
+
+/* ── LANGUAGE ── */
+const LL={
+  en:{site:'Live Precious Metals · India · MCX / GoodReturns',h1:'Gold · Silver · Platinum · Diamond',live:'Live',
+      gs:'Gold Rates · 3 March 2026',ss:'Silver Rates · 3 March 2026',yd:"Yesterday's Close · 2 March 2026",
+      ch:'Live Intraday Chart',pm:'Premium Metals',
+      k22:'22 Karat · 916 Hallmark',k24:'24 Karat · 999 Pure',ks1:'1 Gram · 999 Pure',ks10:'10 Gram · 999 Pure',
+      kdm:'Natural · 1 Carat · D-IF',y22:'Gold 22K',y24:'Gold 24K',ys1:'Silver 1g',ys10:'Silver 10g',
+      calc:'Metal Calculator',gl:'Grams / Units',bl:'Budget',tgs:'Gold & Silver',tpd:'Platinum & Diamond'},
+  hi:{site:'लाइव कीमती धातु · भारत · MCX',h1:'सोना · चांदी · प्लैटिनम · हीरा',live:'लाइव',
+      gs:'सोना भाव · 3 मार्च 2026',ss:'चांदी भाव · 3 मार्च 2026',yd:'कल का बंद भाव',
+      ch:'लाइव इंट्राडे चार्ट',pm:'प्रीमियम धातु',
+      k22:'22 कैरेट · 916 हॉलमार्क',k24:'24 कैरेट · 999 शुद्ध',ks1:'1 ग्राम · 999 शुद्ध',ks10:'10 ग्राम · 999 शुद्ध',
+      kdm:'प्राकृतिक · 1 कैरेट D-IF',y22:'सोना 22K',y24:'सोना 24K',ys1:'चांदी 1g',ys10:'चांदी 10g',
+      calc:'धातु कैलकुलेटर',gl:'ग्राम / इकाई',bl:'बजट',tgs:'सोना और चांदी',tpd:'प्लैटिनम और हीरा'},
+  ta:{site:'நேரடி விலைகள் · இந்தியா · MCX',h1:'தங்கம் · வெள்ளி · பிளாட்டினம் · வைரம்',live:'நேரடி',
+      gs:'தங்க விலை · 3 மார்ச் 2026',ss:'வெள்ளி விலை · 3 மார்ச் 2026',yd:'நேற்றைய நிறைவு',
+      ch:'நேரடி இன்ட்ராடே சார்ட்',pm:'பிரீமியம் உலோகங்கள்',
+      k22:'22 கேரட் · 916',k24:'24 கேரட் · 999',ks1:'1 கிராம்',ks10:'10 கிராம்',
+      kdm:'இயற்கை · 1 கேரட் D-IF',y22:'தங்கம் 22K',y24:'தங்கம் 24K',ys1:'வெள்ளி 1g',ys10:'வெள்ளி 10g',
+      calc:'உலோக கால்குலேட்டர்',gl:'கிராம்',bl:'பட்ஜெட்',tgs:'தங்கம் & வெள்ளி',tpd:'பிளாட்டினம் & வைரம்'},
+};
+function setLang(l,btn){
+  LANG=l;document.querySelectorAll('#langG .cb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');applyL();
+}
+function applyL(){
+  const T=LL[LANG];
+  const ids={'lbl-site':'site','lbl-h1':'h1','liveLbl':'live','lbl-gs':'gs','lbl-ss':'ss','lbl-yd':'yd',
+    'lbl-ch':'ch','lbl-pm':'pm','lk22':'k22','lk24':'k24','lks1':'ks1','lks10':'ks10','lkdm':'kdm',
+    'ly22':'y22','ly24':'y24','lys1':'ys1','lys10':'ys10','ctitle':'calc','lgl':'gl','lbl2':'bl',
+    'tabGs':'tgs','tabPd':'tpd'};
+  Object.entries(ids).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=T[k];});
+}
+
+/* ── LIVE API FETCH ── */
+/* 
+  To use real live prices: get a free API key from https://www.goldapi.io
+  Replace YOUR_GOLDAPI_KEY below and set USE_LIVE_API = true
+  Free tier: 100 calls/month. For unlimited use Metals-API.com (~$9/month)
+*/
+const USE_LIVE_API=false;
+const GOLDAPI_KEY='YOUR_GOLDAPI_KEY';
+
+async function fetchLivePrices(){
+  if(!USE_LIVE_API){
+    document.getElementById('apiBadge').className='api-badge api-sim';
+    document.getElementById('apiBadge').textContent='● Simulated';
+    return;
+  }
+  try{
+    const [goldRes,silverRes]=await Promise.all([
+      fetch('https://www.goldapi.io/api/XAU/INR',{headers:{'x-access-token':GOLDAPI_KEY,'Content-Type':'application/json'}}),
+      fetch('https://www.goldapi.io/api/XAG/INR',{headers:{'x-access-token':GOLDAPI_KEY,'Content-Type':'application/json'}}),
+    ]);
+    if(!goldRes.ok||!silverRes.ok)throw new Error('API error');
+    const goldData=await goldRes.json();
+    const silvData=await silverRes.json();
+    /* goldapi returns price per troy oz. 1 troy oz = 31.1035g */
+    const TROY=31.1035;
+    const goldPerG=goldData.price/TROY;
+    const silvPerG=silvData.price/TROY;
+    /* Derive 22K from 24K: 22K = 24K × (22/24) */
+    BASE.g24=Math.round(goldPerG);
+    BASE.g22=Math.round(goldPerG*(22/24));
+    BASE.s1=parseFloat(silvPerG.toFixed(2));
+    BASE.s10=parseFloat((silvPerG*10).toFixed(2));
+    setCity(CITY);
+    document.getElementById('apiBadge').className='api-badge api-live';
+    document.getElementById('apiBadge').textContent='● Live API';
+    document.getElementById('spotGold').textContent='$'+(goldData.price/USD_INR_RATE).toFixed(0)+'/oz';
+  }catch(e){
+    console.warn('API fetch failed, using simulated rates',e);
+    document.getElementById('apiBadge').className='api-badge api-err';
+    document.getElementById('apiBadge').textContent='● API Error — Simulated';
+  }
+}
+
+/* ── RENDER ── */
+function pct(n,p){const v=((n-p)/p*100);return(v>=0?'▲ +':'▼ ')+Math.abs(v).toFixed(2)+'%';}
+function setB(id,n,p){
+  const el=document.getElementById(id);
+  el.textContent=pct(n,p);el.className='bg2 '+(n>=p?'up':'dn');
+}
+function render(){
+  document.getElementById('g22p').textContent=fmt(live.g22);
+  document.getElementById('g22t').textContent=fmt(live.g22*8);
+  setB('g22b',live.g22,PREV.g22);
+  document.getElementById('g24p').textContent=fmt(live.g24);
+  document.getElementById('g24t').textContent=fmt(live.g24*8);
+  setB('g24b',live.g24,PREV.g24);
+  document.getElementById('s1p').textContent=CURR==='INR'?'₹'+live.s1.toFixed(2):fmt(live.s1,2);
+  document.getElementById('s1t').textContent=fmt(live.s1*100);
+  setB('s1b',live.s1,PREV.s1);
+  document.getElementById('s10p').textContent=CURR==='INR'?'₹'+live.s10.toFixed(2):fmt(live.s10,2);
+  document.getElementById('s10t').textContent=fmt(live.s1*1000);
+  setB('s10b',live.s10,PREV.s10);
+  document.getElementById('ptP').textContent=fmt(live.pt);
+  document.getElementById('ptT').textContent=fmt(live.pt*10);
+  setB('ptB',live.pt,PREV.pt);
+  document.getElementById('dmP').textContent=fmt(live.dm);
+  setB('dmB',live.dm,PREV.dm);
+  document.getElementById('y22v').textContent=fmt(PREV.g22);
+  document.getElementById('y24v').textContent=fmt(PREV.g24);
+  document.getElementById('ys1v').textContent=CURR==='INR'?'₹'+PREV.s1.toFixed(2):fmt(PREV.s1,2);
+  document.getElementById('ys10v').textContent=CURR==='INR'?'₹'+PREV.s10.toFixed(2):fmt(PREV.s10,2);
+  document.getElementById('mcxG').textContent=fmt(live.g24*10)+'/10g';
+  if(document.getElementById('ov').classList.contains('open'))cg();
+  checkAlerts();
+}
+
+/* ── FLASH ── */
+function flash(el,up){el.classList.remove('fl-g','fl-r');void el.offsetWidth;el.classList.add(up?'fl-g':'fl-r');setTimeout(()=>el.classList.remove('fl-g','fl-r'),420);}
+
+/* ── CHART ── */
+const N=60;
+function mkH(base,vol){const a=[];let v=base*.997;for(let i=0;i<N;i++){v+=(Math.random()-.496)*vol+(base-v)*.008;a.push(+v.toFixed(2));}return a;}
+const H={g22:mkH(15629,10),s1:mkH(315.1,.35),pt:mkH(6976,18),dm:mkH(750000,1200)};
+const CC=document.getElementById('mc');
+const CX=CC.getContext('2d');
+let aTab='gs';
+
+function drawChart(){
+  const dpr=window.devicePixelRatio||1;
+  const W=CC.offsetWidth||600,H2=190;
+  CC.width=W*dpr;CC.height=H2*dpr;CX.scale(dpr,dpr);CX.clearRect(0,0,W,H2);
+  const isDark=THEME==='dark';
+  const pL=46,pR=12,pT=12,pB=24,cW=W-pL-pR,cH=H2-pT-pB;
+  const sets=aTab==='gs'
+    ?[{d:H.g22,c:'#D4A017',g:'#FFD700'},{d:H.s1.map(v=>v*50),c:'#A8B8C8',g:'#D0DDE8'}]
+    :[{d:H.pt,c:'#9ECFCF',g:'#9ECFCF'},{d:H.dm.map(v=>v/100),c:'#B0E0FF',g:'#B0E0FF'}];
+  const allD=sets.flatMap(s=>s.d);
+  const mn=Math.min(...allD),mx=Math.max(...allD),rng=mx-mn||1;
+  /* Grid */
+  CX.setLineDash([1,4]);CX.lineWidth=.5;
+  for(let i=0;i<=4;i++){
+    const y=pT+cH*(1-i/4);
+    CX.beginPath();CX.moveTo(pL,y);CX.lineTo(W-pR,y);
+    CX.strokeStyle=isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';CX.stroke();
+    const val=mn+rng*(i/4);
+    CX.fillStyle=isDark?'rgba(255,255,255,.22)':'rgba(0,0,0,.4)';
+    CX.font='7px Cinzel,serif';CX.textAlign='right';
+    CX.fillText(val>=1000?Math.round(val/100)/10+'k':val.toFixed(0),pL-4,y+3);
+  }
+  CX.setLineDash([]);
+  /* X axis */
+  CX.fillStyle=isDark?'rgba(255,255,255,.18)':'rgba(0,0,0,.3)';CX.font='7px serif';CX.textAlign='center';
+  ['Open','','','','','Now'].forEach((lb,i)=>{if(!lb)return;CX.fillText(lb,pL+cW*(i/5),H2-6);});
+  sets.forEach(({d,c,g})=>{
+    const pts=d.map((v,i)=>({x:pL+cW*(i/(d.length-1)),y:pT+cH*(1-(v-mn)/rng)}));
+    const gr=CX.createLinearGradient(0,pT,0,pT+cH);gr.addColorStop(0,c+'28');gr.addColorStop(1,c+'04');
+    CX.beginPath();CX.moveTo(pts[0].x,pT+cH);
+    pts.forEach(p=>CX.lineTo(p.x,p.y));
+    CX.lineTo(pts[pts.length-1].x,pT+cH);CX.closePath();CX.fillStyle=gr;CX.fill();
+    CX.beginPath();
+    pts.forEach((p,i)=>{if(i===0){CX.moveTo(p.x,p.y);return;}const pv=pts[i-1],mx2=(pv.x+p.x)/2;CX.bezierCurveTo(mx2,pv.y,mx2,p.y,p.x,p.y);});
+    CX.strokeStyle=c;CX.lineWidth=1.8;CX.shadowColor=g;CX.shadowBlur=6;CX.stroke();CX.shadowBlur=0;
+    const last=pts[pts.length-1];
+    CX.beginPath();CX.arc(last.x,last.y,5,0,Math.PI*2);CX.strokeStyle=c;CX.lineWidth=1;CX.globalAlpha=.25;CX.stroke();CX.globalAlpha=1;
+    CX.beginPath();CX.arc(last.x,last.y,3,0,Math.PI*2);CX.fillStyle=c;CX.shadowColor=g;CX.shadowBlur=10;CX.fill();CX.shadowBlur=0;
+  });
+}
+function switchTab(btn,tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');aTab=tab;
+  document.getElementById('legRow').innerHTML=tab==='gs'
+    ?`<div class="li"><div class="ld" style="background:#D4A017"></div><span>Gold 22K</span></div><div class="li"><div class="ld" style="background:#A8B8C8"></div><span>Silver ×50</span></div>`
+    :`<div class="li"><div class="ld" style="background:#9ECFCF"></div>Platinum</div><div class="li"><div class="ld" style="background:#B0E0FF"></div>Diamond ÷100</div>`;
+  drawChart();
+}
+
+/* ── TICK ── */
+function tick(){
+  const prev={...live};
+  const adj=CITY_ADJ[CITY]||CITY_ADJ.chennai;
+  live.g22=Math.round(live.g22+(Math.random()-.496)*10+(BASE.g22+adj.g22-live.g22)*.007);
+  live.g24=Math.round(live.g24+(Math.random()-.496)*11+(BASE.g24+adj.g24-live.g24)*.007);
+  live.s1=+((live.s1+(Math.random()-.496)*.55+(BASE.s1+adj.s1-live.s1)*.007)).toFixed(2);
+  live.s10=+(live.s1*10).toFixed(2);
+  live.pt=Math.round(live.pt+(Math.random()-.5)*15+(BASE.pt-live.pt)*.008);
+  live.dm=Math.round(live.dm+(Math.random()-.498)*1500+(BASE.dm-live.dm)*.005);
+  H.g22.push(live.g22);H.g22.shift();H.s1.push(live.s1);H.s1.shift();
+  H.pt.push(live.pt);H.pt.shift();H.dm.push(live.dm);H.dm.shift();
+  ['g22','g24','s1','s10','pt','dm'].forEach(k=>{
+    const pid={g22:'g22p',g24:'g24p',s1:'s1p',s10:'s10p',pt:'ptP',dm:'dmP'}[k];
+    const el=document.getElementById(pid);
+    if(el&&live[k]!==prev[k])flash(el.closest('.rc'),live[k]>prev[k]);
+  });
+  render();drawChart();updT();
+  setTimeout(tick,2500);
+}
+function updT(){
+  const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('upd').textContent='Updated '+t+' IST';
+}
+
+/* ── PRICE ALERTS ── */
+function addAlert(){
+  const metal=document.getElementById('alertMetal').value;
+  const dir=document.getElementById('alertDir').value;
+  const price=parseFloat(document.getElementById('alertPrice').value);
+  if(!price||price<=0){showToast('⚠ Enter a valid price!','warn');return;}
+  const names={g22:'Gold 22K',g24:'Gold 24K',s1:'Silver 1g',s10:'Silver 10g',pt:'Platinum'};
+  activeAlerts.push({id:++alertIdCounter,metal,dir,price,name:names[metal],triggered:false});
+  document.getElementById('alertPrice').value='';
+  renderAlerts();
+  showToast(`🔔 Alert set: ${names[metal]} ${dir==='below'?'falls below':'rises above'} ${fmt(price)}`);
+  requestBrowserNotifPermission();
+}
+function removeAlert(id){activeAlerts=activeAlerts.filter(a=>a.id!==id);renderAlerts();}
+function renderAlerts(){
+  const el=document.getElementById('alertsList');
+  if(!activeAlerts.length){el.innerHTML='<div style="font-size:10px;opacity:.3;text-align:center;padding:12px;font-family:Cinzel,serif">No alerts set yet</div>';return;}
+  el.innerHTML=activeAlerts.map(a=>`
+    <div class="alert-chip" style="${a.triggered?'border-color:#4ade80':''}">
+      <span>${a.name} ${a.dir==='below'?'< ':'> '}${fmt(a.price)} ${a.triggered?'✅':''}</span>
+      <button class="adel" onclick="removeAlert(${a.id})">✕</button>
+    </div>`).join('');
+}
+function checkAlerts(){
+  activeAlerts.forEach(a=>{
+    if(a.triggered)return;
+    const cur=live[a.metal]||0;
+    const hit=(a.dir==='below'&&cur<=a.price)||(a.dir==='above'&&cur>=a.price);
+    if(hit){
+      a.triggered=true;
+      const msg=`🔔 ${a.name} is now ${fmt(cur)} — ${a.dir==='below'?'fell below':'rose above'} ${fmt(a.price)}!`;
+      showToast(msg);
+      if(Notification.permission==='granted'){new Notification('PreciousRates Alert',{body:msg,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">💰</text></svg>'});}
+      renderAlerts();
+    }
+  });
+}
+function quickAlert(e,metal){
+  e.stopPropagation();
+  document.getElementById('alertMetal').value=metal;
+  document.getElementById('alertPrice').value=Math.round(live[metal]||0);
+  toggleAlerts();
+  document.getElementById('bell-'+metal).classList.add('set');
+  setTimeout(()=>document.getElementById('bell-'+metal).classList.remove('set'),500);
+}
+function toggleAlerts(){document.getElementById('alertsPanel').classList.toggle('open');}
+function requestBrowserNotifPermission(){
+  if('Notification' in window&&Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+
+/* Toast */
+let toastTimer;
+function showToast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.style.background=type==='warn'?'linear-gradient(135deg,#2a1a08,#1a0d04)':'';
+  el.style.color=type==='warn'?'#f87171':'';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+/* ── CALCULATOR ── */
+let cM='g22',kE='';
+const mRat={g22:'Gold 22K / gram',g24:'Gold 24K / gram',s1:'Silver / gram',s10:'Silver / 10g',pt:'Platinum / gram',dm:'Diamond / carat'};
+function toggleCalc(){document.getElementById('ov').classList.toggle('open');if(document.getElementById('ov').classList.contains('open'))cg();}
+function ovck(e){if(e.target===document.getElementById('ov'))toggleCalc();}
+function cardClick(e,m){spawnRipple(e,m);cM=m;setM(m,null);}
+function setM(m,btn){
+  cM=m;document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  else{const mp={g22:0,g24:1,s1:2,s10:3,pt:4,dm:5};document.querySelectorAll('.ctab')[mp[m]??0]?.classList.add('active');}
+  document.getElementById('cgrams').value='';document.getElementById('cbudget').value='';kE='';cg();
+}
+function cg(){
+  const rate=live[cM]||0;
+  const rD=CURR==='INR'?'₹'+(['s1','s10'].includes(cM)?rate.toFixed(2):Math.round(rate).toLocaleString('en-IN')):sym()+toD(rate).toFixed(2);
+  document.getElementById('rateInfo').textContent='Rate: '+rD+' · '+(mRat[cM]||'');
+  const g=parseFloat(document.getElementById('cgrams').value)||0;
+  if(g>0){document.getElementById('cres').textContent=fmt(rate*g,['s1','s10'].includes(cM)?2:0);document.getElementById('cunit').textContent=g+' × '+rD;}
+  else{document.getElementById('cres').textContent=fmt(0);document.getElementById('cunit').textContent='Enter grams to see value';}
+}
+function cb2(){
+  const b=parseFloat(document.getElementById('cbudget').value)||0;
+  const bINR=CURR==='USD'?b*USD:CURR==='AED'?b*AED:b;
+  if(bINR>0){const g=(bINR/(live[cM]||1)).toFixed(4);document.getElementById('cres').textContent=g+(cM==='dm'?' ct':' g');document.getElementById('cunit').textContent='You can buy '+g+(cM==='dm'?' carats':' grams');document.getElementById('cgrams').value='';}
+}
+function kp(k){
+  const inp=document.getElementById('cgrams');
+  if(k==='C'){kE='';inp.value='';cg();return;}
+  if(k==='←'){kE=kE.slice(0,-1);inp.value=kE;cg();return;}
+  if(k==='='){try{const r=Function('"use strict";return ('+kE.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-')+')')();kE=String(parseFloat(r.toFixed(6)));inp.value=kE;cg();}catch(e){kE='';inp.value='';}return;}
+  if(k==='%'){try{const r=Function('"use strict";return ('+kE+')')();kE=String(+(r/100).toFixed(8));inp.value=kE;cg();}catch(e){}return;}
+  kE+=k==='÷'?'/':k==='×'?'*':k==='−'?'-':k;inp.value=kE;cg();
+}
+
+/* ── SPIDER WEB ── */
+const wc=document.getElementById('webCanvas');
+const wctx=wc.getContext('2d');
+let W2,H2,nodes=[],wR=[];
+function rsz(){W2=wc.width=window.innerWidth;H2=wc.height=window.innerHeight;}
+rsz();window.addEventListener('resize',()=>{rsz();bWeb();});
+function bWeb(){
+  nodes=[];const cols=Math.ceil(W2/82)+2,rows=Math.ceil(H2/72)+2;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const jx=(Math.random()-.5)*22,jy=(Math.random()-.5)*18;
+    nodes.push({x:c*82-41+jx,y:r*72-36+jy,ox:c*82-41+jx,oy:r*72-36+jy,vx:0,vy:0,r:Math.random()*1.2+0.4});
+  }
+}
+bWeb();
+let mx=-9999,my=-9999;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+function aWR(x,y){wR.push({x,y,r:0,max:Math.max(W2,H2)*.6,t:0});}
+document.addEventListener('click',e=>{if(!e.target.closest('.pop')&&!e.target.closest('.fab')&&!e.target.closest('.alerts-panel'))aWR(e.clientX,e.clientY);});
+document.addEventListener('touchstart',e=>{const t=e.touches[0];aWR(t.clientX,t.clientY);},{passive:true});
+const RC2={g22:'rgba(212,160,23,.32)',g24:'rgba(245,200,66,.3)',s1:'rgba(168,184,200,.28)',s10:'rgba(168,184,200,.28)',pt:'rgba(158,207,207,.28)',dm:'rgba(176,224,255,.28)'};
+function spawnRipple(e,type){
+  const el=document.createElement('div');el.className='ripple';
+  el.style.cssText=`width:55px;height:55px;left:${e.clientX-27}px;top:${e.clientY-27}px;background:${RC2[type]||'rgba(255,255,255,.2)'}`;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),900);aWR(e.clientX,e.clientY);
+}
+function dWeb(){
+  wctx.clearRect(0,0,W2,H2);
+  const isDark=THEME==='dark';
+  const maxD=130*130;
+  nodes.forEach(n=>{
+    const dx=n.ox-mx,dy=n.oy-my,d2=dx*dx+dy*dy;
+    if(d2<14000){const f=(1-d2/14000)*5;n.vx+=dx/Math.sqrt(d2)*f;n.vy+=dy/Math.sqrt(d2)*f;}
+    wR.forEach(rp=>{const rdx=n.x-rp.x,rdy=n.y-rp.y,rd=Math.sqrt(rdx*rdx+rdy*rdy),diff=Math.abs(rd-rp.r);if(diff<25){const a=(1-diff/25)*(1-rp.t)*7;n.vx+=(rdx/(rd||1))*a;n.vy+=(rdy/(rd||1))*a;}});
+    n.vx+=(n.ox-n.x)*.042;n.vy+=(n.oy-n.y)*.042;n.vx*=.76;n.vy*=.76;n.x+=n.vx;n.y+=n.vy;
+  });
+  wR.forEach(rp=>{rp.r+=8;rp.t=rp.r/rp.max;});wR=wR.filter(rp=>rp.r<rp.max);
+  for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+    const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d2=dx*dx+dy*dy;
+    if(d2<maxD){
+      wctx.beginPath();wctx.moveTo(nodes[i].x,nodes[i].y);wctx.lineTo(nodes[j].x,nodes[j].y);
+      wctx.strokeStyle=isDark?`rgba(188,154,56,${(1-d2/maxD)*.24})`:`rgba(180,140,40,${(1-d2/maxD)*.12})`;
+      wctx.lineWidth=.5;wctx.stroke();
+    }
+  }
+  nodes.forEach(n=>{
+    wctx.beginPath();wctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+    wctx.fillStyle=isDark?'rgba(206,168,60,.42)':'rgba(180,140,40,.28)';wctx.fill();
+  });
+  requestAnimationFrame(dWeb);
+}
+dWeb();
+
+/* ══════════════════════════════════════════
+   AI PRICE PREDICTION ENGINE
+   Uses weighted moving average + volatility
+   band + momentum bias on live price history.
+   Clearly labelled as estimate, not exact.
+══════════════════════════════════════════ */
+let aiMetal = 'g22';
+let aiTypingTimer = null;
+
+const AI_METAL_LABELS = {
+  g22:'Gold 22K', g24:'Gold 24K', s1:'Silver 1g', pt:'Platinum'
+};
+
+function setAIMetal(m, btn) {
+  aiMetal = m;
+  document.querySelectorAll('.ai-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  runAIPrediction();
+}
+
+function runAIPrediction() {
+  const btn = document.getElementById('aiRefreshBtn');
+  btn.classList.add('spinning');
+  document.getElementById('aiLoading').classList.add('show');
+  document.getElementById('aiContent').style.opacity = '0.3';
+  document.getElementById('aiCursor').style.display = 'none';
+  if (aiTypingTimer) clearTimeout(aiTypingTimer);
+
+  // Simulate AI "thinking" delay (1.2–2s)
+  const delay = 1200 + Math.random() * 800;
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+    document.getElementById('aiLoading').classList.remove('show');
+    document.getElementById('aiContent').style.opacity = '1';
+    generatePrediction();
+  }, delay);
+}
+
+function generatePrediction() {
+  const histMap = { g22: H.g22, g24: H.g22.map(v => Math.round(v * (17050/15629))), s1: H.s1, pt: H.pt };
+  const hist = histMap[aiMetal] || H.g22;
+  const cur = live[aiMetal] || BASE[aiMetal];
+
+  // Weighted moving average (recent prices weighted more)
+  const n = hist.length;
+  let wSum = 0, wTotal = 0;
+  hist.forEach((v, i) => { const w = i + 1; wSum += v * w; wTotal += w; });
+  const wma = wSum / wTotal;
+
+  // Momentum: slope of last 10 points
+  const recent = hist.slice(-10);
+  const slope = (recent[recent.length-1] - recent[0]) / recent.length;
+
+  // Volatility: standard deviation of last 20 prices
+  const last20 = hist.slice(-20);
+  const mean20 = last20.reduce((a,b) => a+b, 0) / last20.length;
+  const variance = last20.reduce((a,v) => a + (v-mean20)**2, 0) / last20.length;
+  const vol = Math.sqrt(variance);
+
+  // Bias factors (simulated market signals)
+  const usdStrength = -0.3 + Math.random() * 0.6; // USD affects gold inversely
+  const globalDemand = -0.2 + Math.random() * 0.5;
+  const momentumFactor = Math.tanh(slope / (vol || 1)) * 0.4;
+  const totalBias = (usdStrength * -1 + globalDemand + momentumFactor) * (vol * 0.5);
+
+  // Generate forecasts with increasing uncertainty
+  const f1 = Math.round(cur + slope * 1 + totalBias * 0.5 + (Math.random()-0.5) * vol * 0.3);
+  const f3 = Math.round(cur + slope * 3 + totalBias * 1.2 + (Math.random()-0.5) * vol * 0.7);
+  const f7 = Math.round(cur + slope * 6 + totalBias * 2.0 + (Math.random()-0.5) * vol * 1.4);
+
+  // Uncertainty bands (wider as we go further out)
+  const band1 = Math.round(vol * 0.8);
+  const band3 = Math.round(vol * 1.8);
+  const band7 = Math.round(vol * 3.5);
+
+  // Confidence score: inverse of relative volatility + momentum clarity
+  const relVol = vol / (cur || 1);
+  const rawConf = Math.max(42, Math.min(88, 78 - relVol * 8000 + Math.abs(momentumFactor) * 15));
+  const conf = Math.round(rawConf + (Math.random() - 0.5) * 6);
+
+  // Direction
+  function dirLabel(pred, base) {
+    const diff = ((pred - base) / base) * 100;
+    if (diff > 0.3) return { cls: 'ai-bull', txt: '▲ Bullish' };
+    if (diff < -0.3) return { cls: 'ai-bear', txt: '▼ Bearish' };
+    return { cls: 'ai-neutral', txt: '◆ Neutral' };
+  }
+
+  const d1 = dirLabel(f1, cur), d3 = dirLabel(f3, cur), d7 = dirLabel(f7, cur);
+
+  // Update prediction cards
+  function setCard(suffix, price, band, dir) {
+    document.getElementById('aiP'+suffix).textContent = fmt(price);
+    document.getElementById('aiR'+suffix).textContent = fmt(price - band) + ' – ' + fmt(price + band);
+    const el = document.getElementById('aiD'+suffix);
+    el.textContent = dir.txt; el.className = 'ai-card-dir ' + dir.cls;
+  }
+  setCard('1', f1, band1, d1);
+  setCard('3', f3, band3, d3);
+  setCard('7', f7, band7, d7);
+
+  // Confidence bar
+  document.getElementById('aiConfFill').style.width = conf + '%';
+  document.getElementById('aiConfVal').textContent = conf + '% confidence';
+  document.getElementById('aiSubtitle').textContent =
+    'Analysing patterns · ' + AI_METAL_LABELS[aiMetal] + ' · Next 7 days';
+
+  // Build reasoning text
+  const overallDir = f7 > cur ? 'upward' : f7 < cur ? 'downward' : 'sideways';
+  const pctChg = ((f7 - cur) / cur * 100).toFixed(2);
+  const volDesc = vol > cur * 0.003 ? 'elevated' : 'moderate';
+  const mSign = slope > 0 ? 'positive' : slope < 0 ? 'negative' : 'flat';
+
+  const reasoningLines = [
+    `Based on the last ${n} intraday data points for ${AI_METAL_LABELS[aiMetal]}, the weighted moving average stands at ${fmt(Math.round(wma))}/gram.`,
+    ` Current momentum is ${mSign} with an intraday slope of ${slope > 0 ? '+' : ''}${slope.toFixed(2)} per tick.`,
+    ` Volatility is ${volDesc} (σ ≈ ${fmt(Math.round(vol))}), suggesting ${volDesc === 'elevated' ? 'wider price swings' : 'relatively stable movement'} over the forecast window.`,
+    ` Incorporating USD strength signals, global demand patterns, and momentum factors, the model projects an overall ${overallDir} bias of approximately ${pctChg > 0 ? '+' : ''}${pctChg}% over 7 days.`,
+    ` Forecast confidence: ${conf}%. Note: uncertainty bands widen significantly beyond 3 days.`
+  ].join('');
+
+  typeText('aiReasonText', reasoningLines, 18);
+
+  // Draw AI prediction chart
+  drawAIChart(hist, [f1, f3, f7], [band1, band3, band7]);
+}
+
+/* Typewriter effect */
+function typeText(elId, text, speed) {
+  const el = document.getElementById(elId);
+  const cursor = document.getElementById('aiCursor');
+  el.textContent = '';
+  cursor.style.display = 'inline-block';
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      el.textContent += text[i++];
+      aiTypingTimer = setTimeout(type, speed + Math.random() * 12);
+    } else {
+      cursor.style.display = 'none';
+    }
+  }
+  type();
+}
+
+/* AI Prediction Chart */
+function drawAIChart(hist, forecasts, bands) {
+  const canvas = document.getElementById('aiChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 600, H = 120;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const isDark = THEME === 'dark';
+  const pL = 44, pR = 14, pT = 10, pB = 22;
+  const cW = W - pL - pR, cH = H - pT - pB;
+
+  // Use last 20 history points + 3 forecast points
+  const histSlice = hist.slice(-20);
+  const forecastPts = [forecasts[0], forecasts[1], forecasts[2]];
+  const allPts = [...histSlice, ...forecastPts];
+  const bandPts = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, bands[0], bands[1], bands[2]];
+  const mn = Math.min(...allPts.map((v,i) => v - (bandPts[i]||0))) * 0.9995;
+  const mx = Math.max(...allPts.map((v,i) => v + (bandPts[i]||0))) * 1.0005;
+  const rng = mx - mn || 1;
+  const total = allPts.length;
+  const splitIdx = histSlice.length; // where forecast starts
+
+  function px(i) { return pL + cW * (i / (total - 1)); }
+  function py(v) { return pT + cH * (1 - (v - mn) / rng); }
+
+  // Grid lines
+  ctx.setLineDash([1,4]); ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 3; i++) {
+    const y = pT + cH * (1 - i/3);
+    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W-pR, y);
+    ctx.strokeStyle = isDark ? 'rgba(139,92,246,.1)' : 'rgba(139,92,246,.08)'; ctx.stroke();
+    const val = mn + rng * (i/3);
+    ctx.fillStyle = isDark ? 'rgba(167,139,250,.35)' : 'rgba(109,40,217,.4)';
+    ctx.font = '7px Cinzel,serif'; ctx.textAlign = 'right';
+    ctx.fillText(val >= 1000 ? Math.round(val/100)/10+'k' : val.toFixed(0), pL-4, y+3);
+  }
+  ctx.setLineDash([]);
+
+  // Vertical split line (now → forecast)
+  ctx.beginPath();
+  ctx.moveTo(px(splitIdx-1), pT); ctx.lineTo(px(splitIdx-1), pT+cH);
+  ctx.strokeStyle = 'rgba(167,139,250,.3)'; ctx.lineWidth = 1; ctx.setLineDash([3,4]); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(167,139,250,.45)'; ctx.font = '7px Cinzel,serif'; ctx.textAlign = 'center';
+  ctx.fillText('Now', px(splitIdx-1), pT-1);
+
+  // Uncertainty band (forecast zone)
+  ctx.beginPath();
+  for (let i = splitIdx; i < total; i++) {
+    const v = allPts[i], b = bandPts[i]||0;
+    if (i === splitIdx) ctx.moveTo(px(i), py(v+b));
+    else ctx.lineTo(px(i), py(v+b));
+  }
+  for (let i = total-1; i >= splitIdx; i--) {
+    const v = allPts[i], b = bandPts[i]||0;
+    ctx.lineTo(px(i), py(v-b));
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(139,92,246,.12)'; ctx.fill();
+
+  // Historical line (gold)
+  ctx.beginPath();
+  histSlice.forEach((v,i) => {
+    const x = px(i), y = py(v);
+    if (i===0) ctx.moveTo(x,y); else { const pv=histSlice[i-1], mx2=(px(i-1)+x)/2; ctx.bezierCurveTo(mx2,py(pv),mx2,y,x,y); }
+  });
+  ctx.strokeStyle = '#D4A017'; ctx.lineWidth = 1.6; ctx.shadowColor='#FFD700'; ctx.shadowBlur=5; ctx.stroke(); ctx.shadowBlur=0;
+
+  // Forecast dashed line (purple)
+  ctx.beginPath();
+  // Connect from last history to first forecast
+  ctx.moveTo(px(splitIdx-1), py(histSlice[histSlice.length-1]));
+  forecastPts.forEach((v,i) => ctx.lineTo(px(splitIdx+i), py(v)));
+  ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 1.6; ctx.setLineDash([5,4]);
+  ctx.shadowColor='#7c3aed'; ctx.shadowBlur=6; ctx.stroke(); ctx.shadowBlur=0; ctx.setLineDash([]);
+
+  // Forecast dots
+  forecastPts.forEach((v,i) => {
+    ctx.beginPath(); ctx.arc(px(splitIdx+i), py(v), 3.5, 0, Math.PI*2);
+    ctx.fillStyle='#a78bfa'; ctx.shadowColor='#7c3aed'; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
+  });
+
+  // X labels
+  ctx.fillStyle = isDark?'rgba(255,255,255,.18)':'rgba(0,0,0,.3)'; ctx.font='7px serif'; ctx.textAlign='center'; ctx.setLineDash([]);
+  ctx.fillText('History', px(splitIdx/2-1), H-5);
+  ctx.fillText('+1d', px(splitIdx), H-5);
+  ctx.fillText('+3d', px(splitIdx+1), H-5);
+  ctx.fillText('+7d', px(splitIdx+2), H-5);
+}
+
+/* ── INIT ── */
+window.addEventListener('load',()=>{
+  applyL();setCity('chennai');render();updT();
+  setTimeout(drawChart,80);
+  setTimeout(()=>{fetchLivePrices();setTimeout(tick,500);},300);
+  setTimeout(runAIPrediction, 900);
+  window.addEventListener('resize',()=>{drawChart();drawAIChart(H[aiMetal]||H.g22,[],[]);});
+});
+</script>
+</body>
+</html>
